@@ -163,13 +163,19 @@ VALUES ('CTPN001', 'PN001', 'X001', 'Xe A', 'Sedan', 'Honda', 50000, 3, 'Thông 
 INSERT INTO CTPHIEUNHAP (MaCTPN, MaPN, MaXe, TenXe, LoaiXe, Hang, Gia, SoLuong, ThongSo, ThanhTien)
 VALUES ('CTPN002', 'PN002', 'X002', 'Xe B', 'SUV', 'Toyota', 60000, 8, 'Thông số B', 180000);
 
+INSERT INTO CTPHIEUNHAP (MaCTPN, MaPN, MaXe, TenXe, LoaiXe, Hang, Gia, SoLuong, ThongSo, ThanhTien)
+VALUES ('CTPN003', 'PN002', 'X003', 'Xe C', 'SUV', 'Toyota', 60000, 8, 'Thông số C', 180000);
+
+INSERT INTO CTPHIEUNHAP (MaCTPN, MaPN, MaXe, TenXe, LoaiXe, Hang, Gia, SoLuong, ThongSo, ThanhTien)
+VALUES ('CTPN004', 'PN002', 'X003', 'Xe C', 'SUV', 'Toyota', 60000, 2, 'Thông số C', 120000);
+
 INSERT INTO KHACHHANG (MaKH, TenKH, SDT, Email, LoaiKH)
 VALUES ('KH001', 'Khách hàng A', '0123456789', 'khachA@email.com', 'Loại A');
 
 INSERT INTO KHACHHANG (MaKH, TenKH, SDT, Email, LoaiKH)
 VALUES ('KH002', 'Khách hàng B', '0987654321', 'khachB@email.com', 'Loại B');
 
-CREATE TEMPORARY TABLE IF NOT EXISTS debug_table (info varchar(200));
+CREATE TEMPORARY TABLE IF NOT EXISTS debug_table (soluong int);
 DROP TABLE debug_table;
 
 SELECT * FROM xe;
@@ -184,46 +190,23 @@ DROP TRIGGER IF EXISTS update_khi_nhap;
 DELIMITER //
   
 CREATE TRIGGER update_khi_nhap
-AFTER INSERT ON CTPHIEUNHAP
+BEFORE INSERT ON CTPHIEUNHAP
 FOR EACH ROW
 BEGIN
-    DECLARE soLuong INT;
+    DECLARE countMaXe INT;
 
-    -- Lấy số lượng hiện tại của loại xe trong bảng XE
-    SELECT SoLuong INTO soLuong FROM XE WHERE MaXe = NEW.MaXe;
+    -- Kiểm tra xem MaXe đã tồn tại trong bảng XE chưa
+    SELECT COUNT(*) INTO countMaXe FROM XE WHERE MaXe = NEW.MaXe;
 
-    -- Log the value of MaXe and soLuong to the debug_table
-    INSERT INTO debug_table (info) VALUES (CONCAT('MaXe: ', NEW.MaXe, ', soLuong: ', soLuong));
-
-    -- Nếu loại xe đã tồn tại, cập nhật số lượng, ngược lại thêm mới
-    IF soLuong IS NOT NULL THEN
+    -- Nếu MaXe đã tồn tại, cập nhật số lượng
+    IF countMaXe > 0 THEN
         UPDATE XE
-        SET SoLuong = soLuong + NEW.SoLuong
+        SET SoLuong = SoLuong + NEW.SoLuong
         WHERE MaXe = NEW.MaXe;
     ELSE
+        -- Nếu MaXe chưa tồn tại, thêm mới
         INSERT INTO XE (MaXe, TenXe, LoaiXe, Hang, Gia, SoLuong, ThongSo)
         VALUES (NEW.MaXe, NEW.TenXe, NEW.LoaiXe, NEW.Hang, NEW.Gia, NEW.SoLuong, NEW.ThongSo);
-    END IF;
-END;
-//
-
-CREATE TRIGGER update_khi_xuat
-AFTER INSERT ON PHIEUXUAT
-FOR EACH ROW
-BEGIN
-    DECLARE soLuong INT;
-
-    -- Lấy số lượng hiện tại của loại xe trong bảng XE
-    SELECT SoLuong INTO soLuong FROM XE WHERE MaXe = NEW.MaXe;
-
-    -- Nếu loại xe đã tồn tại, cập nhật số lượng, ngược lại báo lỗi
-    IF soLuong IS NOT NULL THEN
-        UPDATE XE
-        SET SoLuong = soLuong - 1
-        WHERE MaXe = NEW.MaXe;
-    ELSE
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Lỗi: Mã xe không tồn tại trong bảng XE.';
     END IF;
 END;
 //
