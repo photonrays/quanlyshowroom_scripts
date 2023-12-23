@@ -1,4 +1,5 @@
-﻿CREATE DATABASE IF NOT EXISTS `QuanLyShowroomOto`;
+﻿-- CREATE DATABASE --
+CREATE DATABASE IF NOT EXISTS `QuanLyShowroomOto`;
 
 USE QuanLyShowroomOto;
 
@@ -63,36 +64,17 @@ CREATE TABLE `QuanLyShowroomOto`.`NHANVIEN` (
     `NgaySinh` DATE NOT NULL
 );
 
-CREATE TABLE `QuanLyShowroomOto`.`PHIEUBAOGIA` (
-	`MaPBG` VARCHAR(10) PRIMARY KEY,
-	`MaKH` VARCHAR(10),
-	`MaXe` VARCHAR(10),
-	`NgayBG` DATE NOT NULL,
-	`TongGiaTri` FLOAT NOT NULL,
-	`MaNV` VARCHAR(10),
-	CONSTRAINT `fk PHIEUBAOGIA.MaKH to KHACHHANG.MaKH` FOREIGN KEY (`MaKH`) REFERENCES `QuanLyShowroomOto`.`KHACHHANG`(`MaKH`),
-	CONSTRAINT `fk PHIEUBAOGIA.MaXe to Xe.MaXe` FOREIGN KEY (`MaXe`) REFERENCES `QuanLyShowroomOto`.`XE`(`MaXe`),
-	CONSTRAINT `fk PHIEUBAOGIA.MaNV to NHANVIEN.MaNV` FOREIGN KEY (`MaNV`) REFERENCES `QuanLyShowroomOto`.`NHANVIEN`(`MaNV`)
-);
-
-CREATE TABLE `QuanLyShowroomOto`.`CTPHIEUBAOGIA` (
-	`MaCTPBG` VARCHAR(10) PRIMARY KEY,
-	`MaPBG` VARCHAR(10),
-	`ThanhPhan` VARCHAR(20) NOT NULL,
-	`DonGia` FLOAT NOT NULL,
-    `MoTa` VARCHAR(50),
-	CONSTRAINT `fk CTPHIEUBAOGIA.MaPBG to PHIEUBAOGIA.MaPBG` FOREIGN KEY (`MaPBG`) REFERENCES `QuanLyShowroomOto`.`PHIEUBAOGIA`(`MaPBG`)
-);
-
 CREATE TABLE `QuanLyShowroomOto`.`HOPDONGDATCOC` (
 	`MaHDDC` VARCHAR(10) PRIMARY KEY,
 	`MaKH` VARCHAR(10),
-	`MaXe` VARCHAR(10),
+	`MaXe` varchar(10),
+  `MaNV` varchar(10),
 	`DieuKien` VARCHAR(40),
 	`SoTienDC` FLOAT NOT NULL,
 	`NgayNhanXe` DATE NOT NULL,
 	CONSTRAINT `fk HOPDONGDATCOC.MaKH to KHACHHANG.MaKH` FOREIGN KEY (`MaKH`) REFERENCES `QuanLyShowroomOto`.`KHACHHANG`(`MaKH`),
-	CONSTRAINT `fk HOPDONGDATCOC.MaXe to XE.MaXe` FOREIGN KEY (`MaXe`) REFERENCES `QuanLyShowroomOto`.`XE`(`MaXe`)
+	CONSTRAINT `fk HOPDONGDATCOC.MaXe to XE.MaXe` FOREIGN KEY (`MaXe`) REFERENCES `QuanLyShowroomOto`.`XE`(`MaXe`),
+  CONSTRAINT `fk HOPDONGDATCOC.MaNV to NHANVIEN.MaNV` FOREIGN KEY (`MaNV`) REFERENCES `QuanLyShowroomOto`.`NHANVIEN`(`MaNV`)
 );
 
 CREATE TABLE `QuanLyShowroomOto`.`KHUYENMAI` (
@@ -106,12 +88,12 @@ CREATE TABLE `QuanLyShowroomOto`.`KHUYENMAI` (
 
 CREATE TABLE `QuanLyShowroomOto`.`HOPDONGMUAXE` (
 	`MaHDMX` VARCHAR(10) PRIMARY KEY,
-	`MaPBG` VARCHAR(10),
+	`MaHDDC` VARCHAR(10),
 	`NgayKy` DATE NOT NULL,
 	`TongGiaTri` FLOAT NOT NULL,
 	`PTTT` VARCHAR(10) NOT NULL,
 	`MaKM` VARCHAR(10),
-	CONSTRAINT `fk HOPDONGMUAXE.MaPBG to PHIEUBAOGIA.MaPBG` FOREIGN KEY (`MaPBG`) REFERENCES `QuanLyShowroomOto`.`PHIEUBAOGIA`(`MaPBG`),
+	CONSTRAINT `fk HOPDONGMUAXE.MaHDDC to HOPDONGDATCOC.MaHDDC` FOREIGN KEY (MaHDDC) REFERENCES `QuanLyShowroomOto`.`HOPDONGDATCOC`(`MaHDDC`),
 	CONSTRAINT `fk HOPDONGMUAXE.MaKM to KHUYENMAI.MaKM` FOREIGN KEY (`MaKM`) REFERENCES `QuanLyShowroomOto`.`KHUYENMAI`(`MaKM`)
 );
 
@@ -139,6 +121,57 @@ CREATE TABLE `QuanLyShowroomOto`.`CTPHIEUBAOHANH` (
 	CONSTRAINT `fk CTPHIEUBAOHANH.MaPBH to PHIEUBAOHANH.MaPBH` FOREIGN KEY (`MaPBH`) REFERENCES `QuanLyShowroomOto`.`PHIEUBAOHANH`(`MaPBH`)
 );
 
+CREATE TEMPORARY TABLE IF NOT EXISTS debug_table (soluong varchar(200));
+
+SELECT * FROM xe;
+
+SELECT * FROM CTPHIEUNHAP;
+
+SELECT * FROM debug_table;
+
+
+-- TRIGGERS --
+DROP TRIGGER IF EXISTS update_khi_nhap;
+
+DELIMITER //
+-- Tăng số lượng xe khi có ct phiếu nhập
+CREATE TRIGGER update_khi_nhap
+BEFORE INSERT ON CTPHIEUNHAP
+FOR EACH ROW
+BEGIN
+    DECLARE countMaXe INT;
+
+    SELECT COUNT(*) INTO countMaXe FROM XE WHERE MaXe = NEW.MaXe;
+
+    IF countMaXe > 0 THEN
+        UPDATE XE
+        SET SoLuong = SoLuong + NEW.SoLuong
+        WHERE MaXe = NEW.MaXe;
+    ELSE
+        INSERT INTO XE (MaXe, TenXe, LoaiXe, Hang, Gia, SoLuong, ThongSo)
+        VALUES (NEW.MaXe, NEW.TenXe, NEW.LoaiXe, NEW.Hang, NEW.Gia, NEW.SoLuong, NEW.ThongSo);
+    END IF;
+END;
+//
+
+DROP TRIGGER IF EXISTS update_khi_xuat;
+
+-- Tăng số lượng xe khi có phiếu xuất
+CREATE TRIGGER update_khi_xuat
+AFTER INSERT ON PHIEUXUAT
+FOR EACH ROW
+BEGIN
+      UPDATE XE
+      SET SoLuong = SoLuong - 1
+      WHERE MaXe = NEW.MaXe;
+END;
+//
+
+DELIMITER ;
+
+-- PROCEDURES --
+
+-- INSERT STATEMENTS --
 INSERT INTO NHACUNGCAP (MaNCC, TenNCC, DiaChi, SDT)
 VALUES ('NCC001', 'Nhà cung cấp A', 'Địa chỉ A', '0123456789');
 
@@ -175,41 +208,4 @@ VALUES ('KH001', 'Khách hàng A', '0123456789', 'khachA@email.com', 'Loại A')
 INSERT INTO KHACHHANG (MaKH, TenKH, SDT, Email, LoaiKH)
 VALUES ('KH002', 'Khách hàng B', '0987654321', 'khachB@email.com', 'Loại B');
 
-CREATE TEMPORARY TABLE IF NOT EXISTS debug_table (soluong int);
-DROP TABLE debug_table;
-
-SELECT * FROM xe;
-
-SELECT * FROM CTPHIEUNHAP;
-
-SELECT * FROM debug_table;
-
-DROP TRIGGER IF EXISTS update_khi_nhap;
-
--- Tăng số lượng xe khi có ct phiếu nhập
-DELIMITER //
-  
-CREATE TRIGGER update_khi_nhap
-BEFORE INSERT ON CTPHIEUNHAP
-FOR EACH ROW
-BEGIN
-    DECLARE countMaXe INT;
-
-    -- Kiểm tra xem MaXe đã tồn tại trong bảng XE chưa
-    SELECT COUNT(*) INTO countMaXe FROM XE WHERE MaXe = NEW.MaXe;
-
-    -- Nếu MaXe đã tồn tại, cập nhật số lượng
-    IF countMaXe > 0 THEN
-        UPDATE XE
-        SET SoLuong = SoLuong + NEW.SoLuong
-        WHERE MaXe = NEW.MaXe;
-    ELSE
-        -- Nếu MaXe chưa tồn tại, thêm mới
-        INSERT INTO XE (MaXe, TenXe, LoaiXe, Hang, Gia, SoLuong, ThongSo)
-        VALUES (NEW.MaXe, NEW.TenXe, NEW.LoaiXe, NEW.Hang, NEW.Gia, NEW.SoLuong, NEW.ThongSo);
-    END IF;
-END;
-//
-DELIMITER ;
-
-
+INSERT INTO PHIEUXUAT (MaPX, MaXe, NgayXuat) VALUES ('PX002', 'X003', '2023-01-01');
