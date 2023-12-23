@@ -1,11 +1,11 @@
-CREATE DATABASE IF NOT EXISTS `QuanLyShowroomOto`;
+﻿CREATE DATABASE IF NOT EXISTS `QuanLyShowroomOto`;
 
 USE QuanLyShowroomOto;
 
 CREATE TABLE `QuanLyShowroomOto`.`NHACUNGCAP` (
 	`MaNCC` VARCHAR(10) PRIMARY KEY,
 	`TenNCC` VARCHAR(50) NOT NULL,
-	`DiaChi` VARCHAR(40) NOT NULL,
+	`DiaChi` VARCHAR(40),
 	`SDT` VARCHAR(10) NOT NULL
 );
 
@@ -23,15 +23,20 @@ CREATE TABLE `QuanLyShowroomOto`.`XE` (
 	`Hang` VARCHAR(10) NOT NULL,
 	`Gia` FLOAT NOT NULL,
 	`SoLuong` INT NOT NULL,
-    `ThongSo` TEXT
+    `ThongSo` text
 );
+
 
 CREATE TABLE `QuanLyShowroomOto`.`CTPHIEUNHAP` (
 	`MaCTPN` VARCHAR(10) PRIMARY KEY,
 	`MaPN` VARCHAR(10),
-	`MaXe` VARCHAR(10),
+	`MaXe` varchar(10) NOT NULL,
+  `TenXe` VARCHAR(20) NOT NULL,
+	`LoaiXe` VARCHAR(10) NOT NULL,
+	`Hang` VARCHAR(10) NOT NULL,
+	`Gia` FLOAT NOT NULL,
 	`SoLuong` INT NOT NULL,
-	`DonGia` FLOAT NOT NULL,
+  `ThongSo` text,
 	`ThanhTien` FLOAT NOT NULL,
 	CONSTRAINT `fk CTPHIEUNHAP.MaPhieuNhap to PHIEUNHAP.MaPhieuNhap` FOREIGN KEY (`MaPN`) REFERENCES `QuanLyShowroomOto`.`PHIEUNHAP`(`MaPN`),
 	CONSTRAINT `fk CTPHIEUNHAP.MaXe to Xe.MaXe` FOREIGN KEY (`MaXe`) REFERENCES `QuanLyShowroomOto`.`XE`(`MaXe`)
@@ -152,11 +157,11 @@ VALUES ('X001', 'Xe A', 'Sedan', 'Honda', 50000, 10, 'Thông số A');
 INSERT INTO XE (MaXe, TenXe, LoaiXe, Hang, Gia, SoLuong, ThongSo)
 VALUES ('X002', 'Xe B', 'SUV', 'Toyota', 60000, 8, 'Thông số B');
 
-INSERT INTO CTPHIEUNHAP (MaCTPN, MaPN, MaXe, SoLuong, DonGia, ThanhTien)
-VALUES ('CTPN001', 'PN001', 'X001', 5, 50000, 250000);
+INSERT INTO CTPHIEUNHAP (MaCTPN, MaPN, MaXe, TenXe, LoaiXe, Hang, Gia, SoLuong, ThongSo, ThanhTien)
+VALUES ('CTPN001', 'PN001', 'X001', 'Xe A', 'Sedan', 'Honda', 50000, 3, 'Thông số A', 150000);
 
-INSERT INTO CTPHIEUNHAP (MaCTPN, MaPN, MaXe, SoLuong, DonGia, ThanhTien)
-VALUES ('CTPN002', 'PN002', 'X002', 3, 60000, 180000);
+INSERT INTO CTPHIEUNHAP (MaCTPN, MaPN, MaXe, TenXe, LoaiXe, Hang, Gia, SoLuong, ThongSo, ThanhTien)
+VALUES ('CTPN002', 'PN002', 'X002', 'Xe B', 'SUV', 'Toyota', 60000, 8, 'Thông số B', 180000);
 
 INSERT INTO KHACHHANG (MaKH, TenKH, SDT, Email, LoaiKH)
 VALUES ('KH001', 'Khách hàng A', '0123456789', 'khachA@email.com', 'Loại A');
@@ -164,10 +169,20 @@ VALUES ('KH001', 'Khách hàng A', '0123456789', 'khachA@email.com', 'Loại A')
 INSERT INTO KHACHHANG (MaKH, TenKH, SDT, Email, LoaiKH)
 VALUES ('KH002', 'Khách hàng B', '0987654321', 'khachB@email.com', 'Loại B');
 
+CREATE TEMPORARY TABLE IF NOT EXISTS debug_table (info varchar(200));
+DROP TABLE debug_table;
+
+SELECT * FROM xe;
+
+SELECT * FROM CTPHIEUNHAP;
+
+SELECT * FROM debug_table;
+
+DROP TRIGGER IF EXISTS update_khi_nhap;
 
 -- Tăng số lượng xe khi có ct phiếu nhập
 DELIMITER //
-
+  
 CREATE TRIGGER update_khi_nhap
 AFTER INSERT ON CTPHIEUNHAP
 FOR EACH ROW
@@ -177,14 +192,17 @@ BEGIN
     -- Lấy số lượng hiện tại của loại xe trong bảng XE
     SELECT SoLuong INTO soLuong FROM XE WHERE MaXe = NEW.MaXe;
 
+    -- Log the value of MaXe and soLuong to the debug_table
+    INSERT INTO debug_table (info) VALUES (CONCAT('MaXe: ', NEW.MaXe, ', soLuong: ', soLuong));
+
     -- Nếu loại xe đã tồn tại, cập nhật số lượng, ngược lại thêm mới
     IF soLuong IS NOT NULL THEN
         UPDATE XE
         SET SoLuong = soLuong + NEW.SoLuong
         WHERE MaXe = NEW.MaXe;
     ELSE
-        INSERT INTO XE (MaXe, SoLuong)
-        VALUES (NEW.MaXe, NEW.SoLuong);
+        INSERT INTO XE (MaXe, TenXe, LoaiXe, Hang, Gia, SoLuong, ThongSo)
+        VALUES (NEW.MaXe, NEW.TenXe, NEW.LoaiXe, NEW.Hang, NEW.Gia, NEW.SoLuong, NEW.ThongSo);
     END IF;
 END;
 //
