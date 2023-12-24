@@ -23,14 +23,13 @@ connection.connect((err) => {
 
   // Insert data into the database using Faker
   const insertData = () => {
-    const fakeMaKH = faker.number.int({ min: 100000, max: 999999 });
     const fakeTenKH = faker.person.fullName();
     const fakeSDT = faker.phone.number();
     const fakeEmail = faker.internet.email();
     const fakeLoaiKH = faker.helpers.arrayElement(['Thường', 'VIP', 'Khách sỉ']);
 
-    const query = 'INSERT INTO KHACHHANG (MaKH, TenKH, SDT, Email, LoaiKH) VALUES (?, ?, ?, ?, ?)';
-    const values = [fakeMaKH, fakeTenKH, fakeSDT, fakeEmail, fakeLoaiKH];
+    const query = 'INSERT INTO KHACHHANG (TenKH, SDT, Email, LoaiKH) VALUES (?, ?, ?, ?)';
+    const values = [fakeTenKH, fakeSDT, fakeEmail, fakeLoaiKH];
 
     connection.query(query, values, (err, results) => {
       if (err) {

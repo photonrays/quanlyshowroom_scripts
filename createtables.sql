@@ -37,14 +37,16 @@ CREATE TABLE `QuanLyShowroomOto`.`CTPHIEUNHAP` (
 	CONSTRAINT `fk CTPHIEUNHAP.MaXe to Xe.MaXe` FOREIGN KEY (`MaXe`) REFERENCES `QuanLyShowroomOto`.`XE`(`MaXe`)
 );
 
+CREATE TABLE `QuanLyShowroomOto`.`KHACHHANG_seq` (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY
+);
 CREATE TABLE `QuanLyShowroomOto`.`KHACHHANG` (
-	`MaKH` VARCHAR(10) PRIMARY KEY,
+	`MaKH` VARCHAR(10) NOT NULL PRIMARY KEY DEFAULT '0',
 	`TenKH` VARCHAR(50),
 	`SDT` VARCHAR(20),
 	`Email` VARCHAR(200),
 	`LoaiKH` VARCHAR(10)
 );
-
 
 CREATE TABLE `QuanLyShowroomOto`.`NHANVIEN` (
 	`MaNV` VARCHAR(10) PRIMARY KEY,
@@ -134,6 +136,24 @@ CREATE TABLE `QuanLyShowroomOto`.`CTPHIEUBAOHANH` (
 	CONSTRAINT `fk CTPHIEUBAOHANH.MaPBH to PHIEUBAOHANH.MaPBH` FOREIGN KEY (`MaPBH`) REFERENCES `QuanLyShowroomOto`.`PHIEUBAOHANH`(`MaPBH`)
 );
 
+-- Trigger auto generate id with prefix
+
+DELIMITER $$
+CREATE TRIGGER trg_set_MaKH
+BEFORE INSERT ON `QuanLyShowroomOto`.`KHACHHANG`
+FOR EACH ROW
+BEGIN
+  INSERT INTO `QuanLyShowroomOto`.`KHACHHANG_seq` VALUES (NULL);
+  IF NEW.LoaiKH = 'Thường' THEN
+        SET NEW.MaKH = CONCAT('KH', 1, LPAD(LAST_INSERT_ID(), 6, '0'));
+    ELSEIF NEW.LoaiKH = 'Khách sỉ' THEN
+        SET NEW.MaKH = CONCAT('KH', 2, LPAD(LAST_INSERT_ID(), 6, '0'));
+    ELSEIF NEW.LoaiKH = 'VIP' THEN
+        SET NEW.MaKH = CONCAT('KH', 3, LPAD(LAST_INSERT_ID(), 6, '0'));
+    END IF;
+END$$
+DELIMITER ;
+
 INSERT INTO NHACUNGCAP (MaNCC, TenNCC, DiaChi, SDT)
 VALUES ('NCC001', 'Nhà cung cấp A', 'Địa chỉ A', '0123456789');
 
@@ -158,11 +178,11 @@ VALUES ('CTPN001', 'PN001', 'X001', 5, 50000, 250000);
 INSERT INTO CTPHIEUNHAP (MaCTPN, MaPN, MaXe, SoLuong, DonGia, ThanhTien)
 VALUES ('CTPN002', 'PN002', 'X002', 3, 60000, 180000);
 
-INSERT INTO KHACHHANG (MaKH, TenKH, SDT, Email, LoaiKH)
-VALUES ('KH001', 'Khách hàng A', '0123456789', 'khachA@email.com', 'Loại A');
+INSERT INTO KHACHHANG (TenKH, SDT, Email, LoaiKH)
+VALUES ('Khách hàng A', '0123456789', 'khachA@email.com', 'Khách sỉ');
 
-INSERT INTO KHACHHANG (MaKH, TenKH, SDT, Email, LoaiKH)
-VALUES ('KH002', 'Khách hàng B', '0987654321', 'khachB@email.com', 'Loại B');
+INSERT INTO KHACHHANG (TenKH, SDT, Email, LoaiKH)
+VALUES ('Khách hàng B', '0987654321', 'khachB@email.com', 'VIP');
 
 
 -- Tăng số lượng xe khi có ct phiếu nhập
