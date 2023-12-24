@@ -242,7 +242,6 @@ END$$
 DELIMITER ;
 
 
-
 SELECT * FROM ctphieubaohanh c;
 SELECT * FROM ctphieunhap c;
 SELECT * FROM hopdongdatcoc h;
@@ -283,4 +282,7 @@ VALUES ('Khách hàng A', '0123456789', 'khachA@email.com', 'Loại A');
 
 INSERT INTO KHACHHANG (TenKH, SDT, Email, LoaiKH)
 VALUES ('Khách hàng B', '0987654321', 'khachB@email.com', 'Loại B');
+
+INSERT INTO NHANVIEN (TenNV, DiaChi, SDT, Email, BangCap, ViTri, NgayVL, NgaySinh)
+VALUES ('Nhân viên A', 'Địa chỉ 1', '0123456789', 'nv1@gmail.com', 'Đại học', 'Thu ngân', '2023-01-01', '2002-02-02');
 
