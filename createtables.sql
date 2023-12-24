@@ -43,12 +43,11 @@ CREATE TABLE `QuanLyShowroomOto`.`CTPHIEUNHAP` (
 
 CREATE TABLE `QuanLyShowroomOto`.`KHACHHANG` (
 	`MaKH` VARCHAR(10) NOT NULL PRIMARY KEY DEFAULT '0',
-	`TenKH` VARCHAR(20),
-	`SDT` VARCHAR(10) UNIQUE,
-	`Email` VARCHAR(20) UNIQUE,
+	`TenKH` VARCHAR(50),
+	`SDT` VARCHAR(20) UNIQUE,
+	`Email` VARCHAR(200) UNIQUE,
 	`LoaiKH` VARCHAR(10)
 );
-
 
 CREATE TABLE `QuanLyShowroomOto`.`NHANVIEN` (
 	`MaNV` VARCHAR(10) NOT NULL PRIMARY KEY DEFAULT '0',
@@ -118,7 +117,6 @@ CREATE TABLE `QuanLyShowroomOto`.`CTPHIEUBAOHANH` (
 	`MoTaLoi` VARCHAR(30),
 	CONSTRAINT `fk CTPHIEUBAOHANH.MaPBH to PHIEUBAOHANH.MaPBH` FOREIGN KEY (`MaPBH`) REFERENCES `QuanLyShowroomOto`.`PHIEUBAOHANH`(`MaPBH`)
 );
-
 
 -- Trigger for NHACUNGCAP
 DELIMITER $$
@@ -278,10 +276,10 @@ INSERT INTO XE (TenXe, LoaiXe, Hang, Gia, SoLuong, ThongSo)
 VALUES ('Xe B', 'SUV', 'Toyota', 60000, 8, 'Thông số B');
 
 INSERT INTO KHACHHANG (TenKH, SDT, Email, LoaiKH)
-VALUES ('Khách hàng A', '0123456789', 'khachA@email.com', 'Loại A');
+VALUES ('Khách hàng A', '0123456789', 'khachA@email.com', 'Khách sỉ');
 
 INSERT INTO KHACHHANG (TenKH, SDT, Email, LoaiKH)
-VALUES ('Khách hàng B', '0987654321', 'khachB@email.com', 'Loại B');
+VALUES ('Khách hàng B', '0987654321', 'khachB@email.com', 'VIP');
 
 INSERT INTO NHANVIEN (TenNV, DiaChi, SDT, Email, BangCap, ViTri, NgayVL, NgaySinh)
 VALUES ('Nhân viên A', 'Địa chỉ 1', '0123456789', 'nv1@gmail.com', 'Đại học', 'Thu ngân', '2023-01-01', '2002-02-02');
