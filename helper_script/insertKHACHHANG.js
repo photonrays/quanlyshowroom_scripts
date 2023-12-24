@@ -1,12 +1,13 @@
 const mysql = require("mysql");
 const { faker } = require('@faker-js/faker/locale/vi');
+require('dotenv').config();
 
-// MySQL database configuration
+// Your database configuration
 const dbConfig = {
-  host: "localhost",
-  user: "qltt",
-  password: "password",
-  database: "QuanLyShowroomOto",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
 };
 
 // Create a MySQL connection
