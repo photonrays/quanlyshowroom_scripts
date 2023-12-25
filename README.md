@@ -18,6 +18,7 @@ Insert dữ liệu vào các bảng:
 ```sh
 node insertKHACHHANG.js
 node insertNHACUNGCAP.js 
+node insertNHANVIEN.js
 ```
 
 ## Conventions
