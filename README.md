@@ -19,3 +19,13 @@ Insert dữ liệu vào các bảng:
 node insertKHACHHANG.js
 node insertNHACUNGCAP.js 
 ```
+
+## Conventions
+
+| Name | Length |
+| ------ | ------ |
+| `Ma` | VARCHAR(10) |
+| `DiaChi` | VARCHAR(100) |
+| `SDT` | VARCHAR(16) |
+| `Ten` (Người) | VARCHAR(50) |
+| `Email` | VARCHAR(100) |
