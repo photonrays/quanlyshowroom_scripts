@@ -23,15 +23,10 @@ connection.connect((err) => {
   console.log("Connected to MySQL database");
 
   // Insert data into the database using Faker
-  const insertData = () => {
-    const fakeTenKH = faker.person.fullName();
-    const fakeSDT = faker.phone.number();
-    const fakeEmail = faker.internet.email();
-    const fakeTongChiTieu = faker.number.float({ min: 0, max: 100000, precision: 0.01 });
-    const fakeKhachVip = faker.number.int({ min: 0, max: 1 });
-
-    const query = 'INSERT INTO KHACHHANG (TenKH, SDT, Email, TongChiTieu, KhachVip ) VALUES (?, ?, ?, ?, ?)';
-    const values = [fakeTenKH, fakeSDT, fakeEmail, fakeTongChiTieu, fakeKhachVip];
+  const insertData = (name) => {
+    const fakeTenHANG = name;
+    const query = 'INSERT INTO HANGXE (TenHANG) VALUES (?)';
+    const values = [fakeTenHANG];
 
     connection.query(query, values, (err, results) => {
       if (err) {
@@ -43,10 +38,52 @@ connection.connect((err) => {
     });
   };
 
-
-  // Insert data 10 times (you can adjust the number as needed)
-  for (let i = 0; i < 100; i++) {
-    insertData();
+let TenNCC = [
+  'Toyota',
+  'Ford',
+  'Chevrolet',
+  'Honda',
+  'Volkswagen',
+  'Nissan',
+  'Mercedes-Benz',
+  'BMW',
+  'Audi',
+  'Hyundai',
+  'Kia',
+  'Tesla',
+  'Volvo',
+  'Mazda',
+  'Fiat',
+  'Subaru',
+  'Jaguar',
+  'Land Rover',
+  'Porsche',
+  'Lexus',
+  'Mitsubishi',
+  'Jeep',
+  'Chrysler',
+  'Buick',
+  'Cadillac',
+  'Acura',
+  'Infiniti',
+  'GMC',
+  'Ram',
+  'Mini',
+  'Smart',
+  'Ferrari',
+  'Lamborghini',
+  'Maserati',
+  'Alfa Romeo',
+  'Bentley',
+  'Bugatti',
+  'McLaren',
+  'Rolls-Royce',
+  'Aston Martin',
+  'Lotus',
+  'Koenigsegg'
+];
+  for (let i = 0; i < TenNCC.length; i++) {
+    insertData(TenNCC[i]);
   }
 connection.end();
 });
