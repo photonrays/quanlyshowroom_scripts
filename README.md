@@ -19,6 +19,8 @@ Insert dữ liệu vào các bảng:
 node insertKHACHHANG.js
 node insertNHACUNGCAP.js 
 node insertNHANVIEN.js
+node insertLOAIXE.js
+node insertHANGXE.js
 ```
 
 ## Conventions
