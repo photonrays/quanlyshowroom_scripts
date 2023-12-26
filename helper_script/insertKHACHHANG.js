@@ -27,10 +27,11 @@ connection.connect((err) => {
     const fakeTenKH = faker.person.fullName();
     const fakeSDT = faker.phone.number();
     const fakeEmail = faker.internet.email();
-    const fakeLoaiKH = faker.helpers.arrayElement(['Thường', 'VIP', 'Khách sỉ']);
+    const fakeTongChiTieu = faker.number.float({ min: 0, max: 100000, precision: 0.01 });
+    const fakeKhachVip = faker.number.int({ min: 0, max: 1 });
 
-    const query = 'INSERT INTO KHACHHANG (TenKH, SDT, Email, LoaiKH) VALUES (?, ?, ?, ?)';
-    const values = [fakeTenKH, fakeSDT, fakeEmail, fakeLoaiKH];
+    const query = 'INSERT INTO KHACHHANG (TenKH, SDT, Email, TongChiTieu, KhachVip ) VALUES (?, ?, ?, ?, ?)';
+    const values = [fakeTenKH, fakeSDT, fakeEmail, fakeTongChiTieu, fakeKhachVip];
 
     connection.query(query, values, (err, results) => {
       if (err) {
