@@ -1,18 +1,14 @@
 ﻿USE QuanLyShowroomOto;
 
--- TRIGGERS --
-
-
-DELIMITER //
 
 -- Tăng số lượng xe khi có ct phiếu nhập
+DELIMITER //
 DROP TRIGGER IF EXISTS update_khi_nhap;
-
 CREATE TRIGGER update_khi_nhap
 BEFORE INSERT ON CTPHIEUNHAP
 FOR EACH ROW
 BEGIN
-    DECLARE countXe INT;
+    DECLARE countXe int;
 
     SELECT COUNT(*) INTO countXe FROM XE WHERE TenXe = NEW.TenXe;
 
@@ -21,15 +17,35 @@ BEGIN
         SET SoLuong = SoLuong + NEW.SoLuong
         WHERE TenXe = NEW.TenXe;
     ELSE
-        INSERT INTO XE (TenXe, LoaiXe, Hang, Gia, SoLuong, ThongSo)
-        VALUES (NEW.TenXe, NEW.LoaiXe, NEW.Hang, NEW.Gia, NEW.SoLuong, NEW.ThongSo);
+        set @MaLX = (SELECT MaLX FROM LOAIXE WHERE TenLX = NEW.LoaiXe);
+
+        IF @MaLX IS NULL THEN
+            INSERT INTO LOAIXE (TenLX) VALUES (NEW.LoaiXe);
+            set @MaLX = LAST_INSERT_ID();
+        END IF;
+
+        set @MaHX = (SELECT MaHX FROM hangxe WHERE TenHang = NEW.HangXe); 
+        
+        IF @MaHX IS NULL THEN
+            INSERT INTO hangxe (TenHang) VALUES (NEW.HangXe);
+            set @MaHX = LAST_INSERT_ID();
+        END IF; 
+
+        INSERT INTO debug_table (info) VALUES (@MaHX);
+        INSERT INTO debug_table (info) VALUES (@MaLX);
+
+        INSERT INTO XE (TenXe, MaLX, MaHX, Gia, SoLuong)
+        VALUES (NEW.TenXe, @MaLX, @MaHX, NEW.Gia, NEW.SoLuong);
     END IF;
 END;
 //
+DELIMITER ;
+
+
 
 -- Giảm số lượng xe khi có phiếu xuất
+DELIMITER //
 DROP TRIGGER IF EXISTS update_khi_xuat;
-
 CREATE TRIGGER update_khi_xuat
 AFTER INSERT ON PHIEUXUAT
 FOR EACH ROW
