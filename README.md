@@ -32,3 +32,11 @@ node insertHANGXE.js
 | `SDT` | VARCHAR(16) |
 | `Ten` (Người) | VARCHAR(50) |
 | `Email` | VARCHAR(100) |
+
+## Đang làm
+  Phân quyền cho db: 
+- admin: thêm xóa sửa tất cả bảng
+- nhanvien: thêm được tất cả bảng
+- khachhang: xem được xe  
+
+  Tạo các procedure
