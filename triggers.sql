@@ -62,7 +62,6 @@ END;
 //
 
 
-
 -- Giảm số lượng xe khi có phiếu xuất
 DROP TRIGGER IF EXISTS update_khi_xuat;
 CREATE TRIGGER update_khi_xuat
@@ -114,6 +113,32 @@ BEGIN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = 'Ngày bắt đầu khuyến mãi phải nhỏ hơn ngày kết thúc';
   END IF;
+END;
+//
+
+-- Cập nhật tổng chi tiêu của khách sau khi thanh toán thành công
+DROP TRIGGER IF EXISTS update_kh_sauthanhtoan;
+CREATE TRIGGER update_kh_sauthanhtoan
+AFTER INSERT ON hopdongmuaxe
+FOR EACH ROW
+BEGIN
+    SELECT MaKH, SoTienDC INTO @MaKH, @SoTienDC FROM hopdongdatcoc WHERE MaHDDC = NEW.MaHDDC;
+    IF @MaKH IS NOT NULL AND @SoTienDC IS NOT NULL THEN
+        UPDATE KHACHHANG
+        SET TongChiTieu = TongChiTieu + NEW.TongGiaTri + @SoTienDC
+        WHERE MaKH = @MaKH;
+
+        SELECT TongChiTieu INTO @TongChiTieu FROM KHACHHANG WHERE MaKH = @MaKH;
+  
+        IF @TongChiTieu > 1000000000 THEN
+            UPDATE KHACHHANG
+            SET KhachVip = 1
+            WHERE MaKH = @MaKH;
+        END IF;
+    ELSE
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Khách hàng không tồn tại';
+    END IF;
 END;
 //
 
