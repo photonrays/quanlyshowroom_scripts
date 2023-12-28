@@ -33,9 +33,6 @@ BEGIN
             set @MaHX = LAST_INSERT_ID();
         END IF; 
 
-        INSERT INTO debug_table (info) VALUES (@MaHX);
-        INSERT INTO debug_table (info) VALUES (@MaLX);
-
         INSERT INTO XE (TenXe, MaLX, MaHX, Gia, SoLuong)
         VALUES (NEW.TenXe, @MaLX, @MaHX, NEW.Gia, NEW.SoLuong);
     END IF;

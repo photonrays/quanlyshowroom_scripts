@@ -11,7 +11,12 @@ const dbConfig = {
 };
 
 // Create a MySQL connection
-const connection = mysql.createConnection(dbConfig);
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '123456',
+  database: 'quanlyshowroomoto'
+});
 
 // Connect to the database
 connection.connect((err) => {
@@ -27,11 +32,10 @@ connection.connect((err) => {
     const fakeTenKH = faker.person.fullName();
     const fakeSDT = faker.phone.number();
     const fakeEmail = faker.internet.email();
-    const fakeTongChiTieu = faker.number.float({ min: 0, max: 100000, precision: 0.01 });
-    const fakeKhachVip = faker.number.int({ min: 0, max: 1 });
+    const fakeTongChiTieu = faker.number.float({ min: 300000000, max: 2000000000 });
 
-    const query = 'INSERT INTO KHACHHANG (TenKH, SDT, Email, TongChiTieu, KhachVip ) VALUES (?, ?, ?, ?, ?)';
-    const values = [fakeTenKH, fakeSDT, fakeEmail, fakeTongChiTieu, fakeKhachVip];
+    const query = 'INSERT INTO KHACHHANG (TenKH, SDT, Email, TongChiTieu ) VALUES (?, ?, ?, ?)';
+    const values = [fakeTenKH, fakeSDT, fakeEmail, fakeTongChiTieu];
 
     connection.query(query, values, (err, results) => {
       if (err) {
