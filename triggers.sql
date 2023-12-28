@@ -1,8 +1,10 @@
 ﻿USE QuanLyShowroomOto;
 
 
--- Tăng số lượng xe khi có ct phiếu nhập
+
 DELIMITER //
+
+-- Tăng số lượng xe khi có ct phiếu nhập
 DROP TRIGGER IF EXISTS update_khi_nhap;
 CREATE TRIGGER update_khi_nhap
 BEFORE INSERT ON CTPHIEUNHAP
@@ -39,12 +41,29 @@ BEGIN
     END IF;
 END;
 //
-DELIMITER ;
+
+-- Cập nhật giá trị thông số khi nhập thông số xe
+DROP TRIGGER IF EXISTS update_thongsoxe;
+CREATE TRIGGER update_thongsoxe
+BEFORE INSERT ON thongsoxenhap
+FOR EACH ROW
+BEGIN
+    set @MaXe = (SELECT MaXe FROM Xe WHERE TenXe = (SELECT TenXe FROM ctphieunhap WHERE MaCTPN = NEW.MaCTPN));
+    IF @MaXe IS NOT NULL THEN
+        INSERT IGNORE INTO tenthongso (TTS) VALUES (NEW.TenTS);
+        set @MaTTS = (SELECT MaTTS FROM tenthongso WHERE TTS = NEW.TenTS);
+        
+        INSERT IGNORE INTO giatrithongso (MaXe, MaTTS, GiaTri) VALUES (@MaXe, @MaTTS, NEW.GiaTri);
+    ELSE
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Xe không tồn tại.';
+    END IF;
+END;
+//
 
 
 
 -- Giảm số lượng xe khi có phiếu xuất
-DELIMITER //
 DROP TRIGGER IF EXISTS update_khi_xuat;
 CREATE TRIGGER update_khi_xuat
 AFTER INSERT ON PHIEUXUAT
@@ -65,7 +84,6 @@ END;
 
 -- Kiểm tra số lượng xe trong kho trước khi đặt cọc
 DROP TRIGGER IF EXISTS check_truoc_datcoc;
-
 CREATE TRIGGER check_truoc_datcoc
 BEFORE INSERT ON HOPDONGDATCOC
 FOR EACH ROW
@@ -83,7 +101,6 @@ END;
 
 -- Kiểm tra phần trăm và ngày của khuyến mãi
 DROP TRIGGER IF EXISTS check_KHUYENMAI_insert;
-
 CREATE TRIGGER check_KHUYENMAI_insert
 BEFORE INSERT ON KHUYENMAI
 FOR EACH ROW
