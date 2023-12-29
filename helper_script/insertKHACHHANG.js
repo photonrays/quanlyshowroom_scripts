@@ -11,12 +11,7 @@ const dbConfig = {
 };
 
 // Create a MySQL connection
-const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '123456',
-  database: 'quanlyshowroomoto'
-});
+const connection = mysql.createConnection(dbConfig);
 
 // Connect to the database
 connection.connect((err) => {
