@@ -19,9 +19,15 @@ Insert dữ liệu vào các bảng:
 node insertKHACHHANG.js
 node insertNHACUNGCAP.js 
 node insertNHANVIEN.js
+node insertKHUYENMAI.js
 node insertLOAIXE.js
 node insertHANGXE.js
+node insertXE.js
+node insertTENTHONGSO.js
+node insertGIATRITHONGSO.js
 ```
+
+TODO : test case
 
 ## Conventions
 
@@ -37,6 +43,6 @@ node insertHANGXE.js
   Phân quyền cho db: 
 - admin: thêm xóa sửa tất cả bảng
 - nhanvien: thêm được tất cả bảng
-- khachhang: xem được xe  
+- khachhang: xem được xe
 
   Tạo các procedure

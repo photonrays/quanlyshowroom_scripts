@@ -45,6 +45,7 @@ CREATE TABLE GIATRITHONGSO (
     MaXe VARCHAR(10),
     MaTTS INT,
     GiaTri VARCHAR(20) NOT NULL,
+    DonVi VARCHAR(20),
     UNIQUE `unique_index` (MaXe, MaTTS, GiaTri),
     CONSTRAINT `fk GIATRITHONGSO.MaXe to XE.MaXE` FOREIGN KEY (MaXe)
         REFERENCES XE (MaXe),
