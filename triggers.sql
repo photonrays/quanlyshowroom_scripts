@@ -87,7 +87,7 @@ DELIMITER //
 -- Kiểm tra số lượng xe trong kho trước khi đặt cọc
 DROP TRIGGER IF EXISTS check_truoc_datcoc;
 CREATE TRIGGER check_truoc_datcoc
-BEFORE INSERT ON HOPDONGDATCOC
+BEFORE INSERT ON THONGTINDATCOC
 FOR EACH ROW
 BEGIN
   DECLARE xe_count INT;
@@ -101,6 +101,26 @@ BEGIN
 END;
 //
 DELIMITER ;
+
+DELIMITER //
+-- Kiểm tra số lượng xe trong kho trước khi thanh toán
+DROP TRIGGER IF EXISTS check_truoc_thanhtoan;
+CREATE TRIGGER check_truoc_thanhtoan
+BEFORE INSERT ON HOADON
+FOR EACH ROW
+BEGIN
+  DECLARE xe_count INT;
+
+  SELECT COUNT(*) INTO xe_count FROM XE WHERE MaXe = NEW.MaXe AND SoLuong > 0;
+  
+  IF xe_count = 0 THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Mã xe không tồn tại hoặc số lượng xe không đủ';
+  END IF;
+END;
+//
+DELIMITER ;
+
 
 DELIMITER //
 -- Kiểm tra phần trăm và ngày của khuyến mãi
@@ -121,14 +141,15 @@ BEGIN
 END;
 //
 DELIMITER ;
+
 DELIMITER //
 -- Cập nhật tổng chi tiêu của khách sau khi thanh toán thành công
 DROP TRIGGER IF EXISTS update_kh_sauthanhtoan;
 CREATE TRIGGER update_kh_sauthanhtoan
-AFTER INSERT ON hopdongmuaxe
+AFTER INSERT ON HOADON
 FOR EACH ROW
 BEGIN
-    SELECT MaKH, SoTienDC INTO @MaKH, @SoTienDC FROM hopdongdatcoc WHERE MaHDDC = NEW.MaHDDC;
+    SELECT MaKH, SoTienDC INTO @MaKH, @SoTienDC FROM HOADON WHERE MaHD = NEW.MaHD;
     IF @MaKH IS NOT NULL AND @SoTienDC IS NOT NULL THEN
         UPDATE KHACHHANG
         SET TongChiTieu = TongChiTieu + NEW.TongGiaTri + @SoTienDC
