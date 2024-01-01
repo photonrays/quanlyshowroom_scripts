@@ -14,17 +14,9 @@ Cài đặt các thư viện, sau đó test kết nối đến csdl.
 npm install
 node test-connection.js
 ```
-Insert dữ liệu vào các bảng:
+Insert dữ liệu vào các bảng và test trigger
 ```sh
-node insertKHACHHANG.js
-node insertNHACUNGCAP.js 
-node insertNHANVIEN.js
-node insertKHUYENMAI.js
-node insertLOAIXE.js
-node insertHANGXE.js
-node insertXE.js
-node insertTENTHONGSO.js
-node insertGIATRITHONGSO.js
+sh test.sh
 ```
 
 TODO : test case
