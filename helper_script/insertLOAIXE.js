@@ -20,7 +20,7 @@ connection.connect((err) => {
     throw err;
   }
 
-  console.log("Connected to MySQL database");
+  console.log("Inserting into LOAIXE");
 
   // Insert data into the database using Faker
   const insertData = (name) => {
@@ -33,7 +33,6 @@ connection.connect((err) => {
         console.error("Error inserting data:", err);
         throw err;
       }
-      console.log("Data inserted successfully");
       // Close the connection after inserting data
     });
   };
