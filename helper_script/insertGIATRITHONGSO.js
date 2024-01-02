@@ -32,9 +32,10 @@ connection.connect((err) => {
     }
     const fakeMaTTS = faker.number.int({ min: 1, max: 55 });
     const fakeGiaTri = faker.number.float({ min: 1, max: 2000 });
-    const fakeDonVi = faker.helpers.arrayElement(
+    const fakeDonVi = faker.helpers.arrayElement([
       // Distance
       "km",
+      "mm",
       "m",
       "mi",
       "yd",
@@ -86,8 +87,8 @@ connection.connect((err) => {
       "rad",
 
       // Percentage
-      "%"
-    );
+      "%",
+    ]);
 
     const query =
       "INSERT INTO GIATRITHONGSO (MaXe, MaTTS, GiaTri, DonVi ) VALUES (?, ?, ?, ?)";

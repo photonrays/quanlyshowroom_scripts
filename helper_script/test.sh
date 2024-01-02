@@ -7,4 +7,6 @@ node insertHANGXE.js
 node insertXE.js
 node insertTENTHONGSO.js
 node insertGIATRITHONGSO.js
+node insertTHONGTINDATCOC.js
+node insertHOADON.js
 npx mocha trigger_test.js

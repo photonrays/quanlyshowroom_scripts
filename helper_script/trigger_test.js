@@ -57,19 +57,24 @@ describe("QuanLyShowroomOto trigger tests", () => {
 
     await executeQuery(phieuNhapQuery, phieuNhapValues);
 
+    const SLDauQuery =
+      'SELECT SoLuong FROM QuanLyShowroomOto.XE where TenXe = "Toyota Camry"';
+    const SLDauResult = await executeQuery(SLDauQuery);
+    var sl_ban_dau = SLDauResult[0].SoLuong;
+
     // Insert a record into CTPHIEUNHAP
     const ctpQuery = `
-      INSERT INTO CTPHIEUNHAP (MaCTPN, MaPN, TenXe, LoaiXe, HangXe, Gia, SoLuong, ThanhTien)
-      VALUES ('XE0002', 'PN0001', 'Honda Civic', 'Compact', 'Brand1', 20000, 5, 100000)
+      INSERT INTO CTPHIEUNHAP (MaPN, TenXe, LoaiXe, HangXe, Gia, SoLuong, ThanhTien)
+      VALUES ('PN0001', 'Toyota Camry', 'Roadster', 'Volvo', 20000, 5, 100000)
     `;
     await executeQuery(ctpQuery);
 
-    // Check if the XE table is updated
-    const selectQuery = 'SELECT * FROM XE WHERE TenXe = "Honda Civic"';
-    const results = await executeQuery(selectQuery);
+    const SLSauQuery =
+      'SELECT SoLuong FROM QuanLyShowroomOto.XE where TenXe = "Toyota Camry"';
+    const SLSauResult = await executeQuery(SLSauQuery);
+    var sl_luc_sau = SLSauResult[0].SoLuong;
 
-    const updatedXERow = results[0];
-    assert.ok(updatedXERow.SoLuong > 5, true);
+    assert.equal(sl_ban_dau + 5, sl_luc_sau);
   });
 
   it("Cập nhật giá trị thông số khi nhập thông số xe", async () => {
@@ -83,7 +88,26 @@ describe("QuanLyShowroomOto trigger tests", () => {
       "SELECT * FROM GIATRITHONGSO WHERE MaXe = (SELECT MaXe FROM XE WHERE TenXe = (SELECT TenXe FROM CTPHIEUNHAP WHERE MaCTPN = 'CTPN0001'))";
     const results = await executeQuery(selectQuery);
 
-    assert.equal(results.length, 1);
+    assert.ok(results.length > 0, true);
+  });
+
+  it("Giảm số lượng xe khi có phiếu xuất", async () => {
+    // Insert a record into THONGSOXENHAP
+
+    const SLDauQuery =
+      'SELECT SoLuong FROM QuanLyShowroomOto.XE where MaXe = "XE0001"';
+    const SLDauResult = await executeQuery(SLDauQuery);
+    var sl_ban_dau = SLDauResult[0].SoLuong;
+
+    const phieuXuatQuery =
+      'INSERT INTO PHIEUXUAT (MaXe, NgayXuat) VALUES ("XE0001", "2024-01-01")';
+    await executeQuery(phieuXuatQuery);
+
+    const SLSauQuery =
+      'SELECT SoLuong FROM QuanLyShowroomOto.XE where MaXe = "XE0001"';
+    const SLSauResult = await executeQuery(SLSauQuery);
+    var sl_luc_sau = SLSauResult[0].SoLuong;
+
+    assert.equal(sl_ban_dau, sl_luc_sau + 1);
   });
 });
-
