@@ -149,10 +149,10 @@ CREATE TRIGGER update_kh_sauthanhtoan
 AFTER INSERT ON HOADON
 FOR EACH ROW
 BEGIN
-    SELECT MaKH, SoTienDC INTO @MaKH, @SoTienDC FROM HOADON WHERE MaHD = NEW.MaHD;
-    IF @MaKH IS NOT NULL AND @SoTienDC IS NOT NULL THEN
+    SELECT MaKH, TongGiaTri INTO @MaKH, @TongGiaTri FROM HOADON WHERE MaHD = NEW.MaHD;
+    IF @MaKH IS NOT NULL AND @TongGiaTri IS NOT NULL THEN
         UPDATE KHACHHANG
-        SET TongChiTieu = TongChiTieu + NEW.TongGiaTri + @SoTienDC
+        SET TongChiTieu = TongChiTieu + NEW.TongGiaTri + @TongGiaTri
         WHERE MaKH = @MaKH;
 
         SELECT TongChiTieu INTO @TongChiTieu FROM KHACHHANG WHERE MaKH = @MaKH;
