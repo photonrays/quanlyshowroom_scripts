@@ -1,6 +1,6 @@
 const mysql = require("mysql");
 const assert = require("assert");
-const { faker } = require('@faker-js/faker/locale/vi');
+const { faker } = require("@faker-js/faker/locale/vi");
 require("dotenv").config();
 
 // Database configuration
@@ -11,27 +11,33 @@ const dbConfig = {
   database: process.env.DB_DATABASE,
 };
 
-// Function to execute a SQL query
-function executeQuery(query, values, callback) {
+// Function to execute a SQL query with promises
+function executeQuery(query, values) {
   const connection = mysql.createConnection(dbConfig);
 
-  connection.connect();
+  return new Promise((resolve, reject) => {
+    connection.connect();
 
-  connection.query(query, values, (err, results) => {
-    if (err) {
-      console.error('Error executing query:', err);
-      throw err;
-    }
+    connection.query(query, values, (err, results) => {
+      if (err) {
+        console.error("Error executing query:", err);
+        reject(err);
+      }
 
-    callback(results);
+      resolve(results);
 
-    connection.end();
+      connection.end();
+    });
   });
 }
 
 // Function to generate a fake date
 function generateFakeDate() {
-  return faker.date.betweens({ from: '2019-01-01T00:00:00.000Z', to: '2023-01-01T00:00:00.000Z', count: 1 });
+  return faker.date.betweens({
+    from: "2019-01-01T00:00:00.000Z",
+    to: "2023-01-01T00:00:00.000Z",
+    count: 1,
+  });
 }
 
 // Function to generate a fake supplier code
@@ -42,33 +48,42 @@ function generateFakeSupplierCode() {
 
 // Your test cases
 describe("QuanLyShowroomOto trigger tests", () => {
-  it("Tăng số lượng xe khi có ct phiếu nhập", (done) => {
-    // Insert a record into CTPHIEUNHAP
+  it("Tăng số lượng xe khi có ct phiếu nhập", async () => {
+    // Insert a record into PHIEUNHAP
     const fakeNgayNhap = generateFakeDate();
     const fakeMaNCC = generateFakeSupplierCode();
     const phieuNhapQuery = `INSERT INTO PHIEUNHAP (NgayNhap, MaNCC) VALUES (?, ?)`;
     const phieuNhapValues = [fakeNgayNhap, fakeMaNCC];
 
-    executeQuery(phieuNhapQuery, phieuNhapValues, () => {
-      // Insert a record into CTPHIEUNHAP
-      const ctpQuery = `
-        INSERT INTO CTPHIEUNHAP (MaCTPN, MaPN, TenXe, LoaiXe, HangXe, Gia, SoLuong, ThanhTien)
-        VALUES ('XE0002', 'PN0001', 'Honda Civic', 'Compact', 'Brand1', 20000, 5, 100000)
-      `;
+    await executeQuery(phieuNhapQuery, phieuNhapValues);
 
-      executeQuery(ctpQuery, [], () => {
-        // Check if the XE table is updated
-        const selectQuery = 'SELECT * FROM XE WHERE TenXe = "Honda Civic"';
+    // Insert a record into CTPHIEUNHAP
+    const ctpQuery = `
+      INSERT INTO CTPHIEUNHAP (MaCTPN, MaPN, TenXe, LoaiXe, HangXe, Gia, SoLuong, ThanhTien)
+      VALUES ('XE0002', 'PN0001', 'Honda Civic', 'Compact', 'Brand1', 20000, 5, 100000)
+    `;
+    await executeQuery(ctpQuery);
 
-        executeQuery(selectQuery, [], (results) => {
-          const updatedXERow = results[0];
-          assert.ok(updatedXERow.SoLuong > 5, true);
+    // Check if the XE table is updated
+    const selectQuery = 'SELECT * FROM XE WHERE TenXe = "Honda Civic"';
+    const results = await executeQuery(selectQuery);
 
-          done();
-        });
-      });
-    });
+    const updatedXERow = results[0];
+    assert.ok(updatedXERow.SoLuong > 5, true);
   });
 
-  // Add more test cases as needed
+  it("Cập nhật giá trị thông số khi nhập thông số xe", async () => {
+    // Insert a record into THONGSOXENHAP
+    const insertQuery =
+      'INSERT INTO THONGSOXENHAP (MaCTPN, TenTS, GiaTri, DonVi) VALUES ("CTPN0001", "TestTS", "TestValue", "TestUnit")';
+    await executeQuery(insertQuery);
+
+    // Check if the giatrithongso table is updated
+    const selectQuery =
+      "SELECT * FROM GIATRITHONGSO WHERE MaXe = (SELECT MaXe FROM XE WHERE TenXe = (SELECT TenXe FROM CTPHIEUNHAP WHERE MaCTPN = 'CTPN0001'))";
+    const results = await executeQuery(selectQuery);
+
+    assert.equal(results.length, 1);
+  });
 });
+

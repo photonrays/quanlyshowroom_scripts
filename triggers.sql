@@ -45,12 +45,12 @@ CREATE TRIGGER update_thongsoxe
 BEFORE INSERT ON THONGSOXENHAP
 FOR EACH ROW
 BEGIN
-    set @MaXe = (SELECT MaXe FROM Xe WHERE TenXe = (SELECT TenXe FROM ctphieunhap WHERE MaCTPN = NEW.MaCTPN));
+    set @MaXe = (SELECT MaXe FROM XE WHERE TenXe = (SELECT TenXe FROM CTPHIEUNHAP WHERE MaCTPN = NEW.MaCTPN));
     IF @MaXe IS NOT NULL THEN
-        INSERT IGNORE INTO tenthongso (TTS) VALUES (NEW.TenTS);
-        set @MaTTS = (SELECT MaTTS FROM tenthongso WHERE TTS = NEW.TenTS);
+        INSERT IGNORE INTO TENTHONGSO (TTS) VALUES (NEW.TenTS);
+        set @MaTTS = (SELECT MaTTS FROM TENTHONGSO WHERE TTS = NEW.TenTS);
         
-        INSERT IGNORE INTO giatrithongso (MaXe, MaTTS, GiaTri, DonVi) VALUES (@MaXe, @MaTTS, NEW.GiaTri, NEW.DonVi);
+        INSERT IGNORE INTO GIATRITHONGSO (MaXe, MaTTS, GiaTri, DonVi) VALUES (@MaXe, @MaTTS, NEW.GiaTri, NEW.DonVi);
     ELSE
         SIGNAL SQLSTATE '45000' 
         SET MESSAGE_TEXT = 'Xe không tồn tại.';
@@ -65,7 +65,7 @@ CREATE TRIGGER update_khi_xuat
 AFTER INSERT ON PHIEUXUAT
 FOR EACH ROW
 BEGIN
-    SET @SoLuong = (SELECT SoLuong FROM Xe WHERE MaXe = NEW.MaXe);
+    SET @SoLuong = (SELECT SoLuong FROM XE WHERE MaXe = NEW.MaXe);
 
     IF @SoLuong > 0 THEN
         UPDATE XE
