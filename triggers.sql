@@ -1,11 +1,9 @@
 ﻿USE QuanLyShowroomOto;
 
-
+DROP TRIGGER IF EXISTS update_khi_nhap;
 
 DELIMITER //
-
 -- Tăng số lượng xe khi có ct phiếu nhập
-DROP TRIGGER IF EXISTS update_khi_nhap;
 CREATE TRIGGER update_khi_nhap
 BEFORE INSERT ON CTPHIEUNHAP
 FOR EACH ROW
@@ -36,40 +34,38 @@ BEGIN
         INSERT INTO XE (TenXe, MaLX, MaHX, Gia, SoLuong)
         VALUES (NEW.TenXe, @MaLX, @MaHX, NEW.Gia, NEW.SoLuong);
     END IF;
-END;
-//
+END;//
 DELIMITER ;
+
+DROP TRIGGER IF EXISTS update_thongsoxe;
 
 DELIMITER //
 -- Cập nhật giá trị thông số khi nhập thông số xe
-DROP TRIGGER IF EXISTS update_thongsoxe;
 CREATE TRIGGER update_thongsoxe
-BEFORE INSERT ON thongsoxenhap
+BEFORE INSERT ON THONGSOXENHAP
 FOR EACH ROW
 BEGIN
-    set @MaXe = (SELECT MaXe FROM Xe WHERE TenXe = (SELECT TenXe FROM ctphieunhap WHERE MaCTPN = NEW.MaCTPN));
+    set @MaXe = (SELECT MaXe FROM XE WHERE TenXe = (SELECT TenXe FROM CTPHIEUNHAP WHERE MaCTPN = NEW.MaCTPN));
     IF @MaXe IS NOT NULL THEN
-        INSERT IGNORE INTO tenthongso (TTS) VALUES (NEW.TenTS);
-        set @MaTTS = (SELECT MaTTS FROM tenthongso WHERE TTS = NEW.TenTS);
+        INSERT IGNORE INTO TENTHONGSO (TTS) VALUES (NEW.TenTS);
+        set @MaTTS = (SELECT MaTTS FROM TENTHONGSO WHERE TTS = NEW.TenTS);
         
-        INSERT IGNORE INTO giatrithongso (MaXe, MaTTS, GiaTri, DonVi) VALUES (@MaXe, @MaTTS, NEW.GiaTri, NEW.DonVi);
+        INSERT IGNORE INTO GIATRITHONGSO (MaXe, MaTTS, GiaTri, DonVi) VALUES (@MaXe, @MaTTS, NEW.GiaTri, NEW.DonVi);
     ELSE
         SIGNAL SQLSTATE '45000' 
         SET MESSAGE_TEXT = 'Xe không tồn tại.';
     END IF;
-END;
-//
+END;//
 DELIMITER ;
 
-DELIMITER //
-
--- Giảm số lượng xe khi có phiếu xuất
 DROP TRIGGER IF EXISTS update_khi_xuat;
+DELIMITER //
+-- Giảm số lượng xe khi có phiếu xuất
 CREATE TRIGGER update_khi_xuat
 AFTER INSERT ON PHIEUXUAT
 FOR EACH ROW
 BEGIN
-    SET @SoLuong = (SELECT SoLuong FROM Xe WHERE MaXe = NEW.MaXe);
+    SET @SoLuong = (SELECT SoLuong FROM XE WHERE MaXe = NEW.MaXe);
 
     IF @SoLuong > 0 THEN
         UPDATE XE
@@ -79,13 +75,12 @@ BEGIN
         SIGNAL SQLSTATE '45000' 
         SET MESSAGE_TEXT = 'Không thể xuất kho. Xe không tồn tại hoặc số lượng đã hết.';
     END IF;
-END;
-//
+END;//
 DELIMITER ;
 
+DROP TRIGGER IF EXISTS check_truoc_datcoc;
 DELIMITER //
 -- Kiểm tra số lượng xe trong kho trước khi đặt cọc
-DROP TRIGGER IF EXISTS check_truoc_datcoc;
 CREATE TRIGGER check_truoc_datcoc
 BEFORE INSERT ON THONGTINDATCOC
 FOR EACH ROW
@@ -98,13 +93,12 @@ BEGIN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = 'Mã xe không tồn tại hoặc số lượng xe không đủ';
   END IF;
-END;
-//
+END;//
 DELIMITER ;
 
+DROP TRIGGER IF EXISTS check_truoc_thanhtoan;
 DELIMITER //
 -- Kiểm tra số lượng xe trong kho trước khi thanh toán
-DROP TRIGGER IF EXISTS check_truoc_thanhtoan;
 CREATE TRIGGER check_truoc_thanhtoan
 BEFORE INSERT ON HOADON
 FOR EACH ROW
@@ -117,14 +111,12 @@ BEGIN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = 'Mã xe không tồn tại hoặc số lượng xe không đủ';
   END IF;
-END;
-//
+END;//
 DELIMITER ;
 
-
+DROP TRIGGER IF EXISTS check_KHUYENMAI_insert;
 DELIMITER //
 -- Kiểm tra phần trăm và ngày của khuyến mãi
-DROP TRIGGER IF EXISTS check_KHUYENMAI_insert;
 CREATE TRIGGER check_KHUYENMAI_insert
 BEFORE INSERT ON KHUYENMAI
 FOR EACH ROW
@@ -138,13 +130,12 @@ BEGIN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = 'Ngày bắt đầu khuyến mãi phải nhỏ hơn ngày kết thúc';
   END IF;
-END;
-//
+END;//
 DELIMITER ;
 
+DROP TRIGGER IF EXISTS update_kh_sauthanhtoan;
 DELIMITER //
 -- Cập nhật tổng chi tiêu của khách sau khi thanh toán thành công
-DROP TRIGGER IF EXISTS update_kh_sauthanhtoan;
 CREATE TRIGGER update_kh_sauthanhtoan
 AFTER INSERT ON HOADON
 FOR EACH ROW
@@ -166,8 +157,6 @@ BEGIN
         SIGNAL SQLSTATE '45000' 
         SET MESSAGE_TEXT = 'Khách hàng không tồn tại';
     END IF;
-END;
-//
-
+END;//
 DELIMITER ;
 
